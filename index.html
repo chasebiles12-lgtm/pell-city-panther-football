@@ -44,6 +44,19 @@ footer{text-align:center;padding:30px;color:#aaa;border-top:1px solid #333}
 .profile .links a{font-size:15px;padding:12px}
 .hint{font-size:13px;color:#bbb;line-height:1.5}
 @media(max-width:750px){.profile{grid-template-columns:1fr}}
+
+.player-photo{width:100%;height:220px;object-fit:cover;object-position:center 22%;border-radius:9px;margin-bottom:12px;background:#292929}
+.photo-missing{height:220px;display:grid;place-items:center;background:linear-gradient(145deg,#282419,#101013);border:1px dashed #65562c;border-radius:9px;margin-bottom:12px;color:#c9b77b;font-weight:700}
+.offer-logos{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.offer-logo{width:52px;height:52px;object-fit:contain;background:#fff;border-radius:8px;padding:5px}
+.offer-label{font-size:12px;color:#ccc;margin:10px 0 4px}
+.editor-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.editor-row label{font-size:13px;color:#ddd}
+.editor-row input{margin:5px 0 12px}
+.editor-offer{display:flex;gap:8px;align-items:center}
+.editor-offer input{flex:1;min-width:0}
+.editor-offer button{flex:none}
+.editor-help{color:#bfbfbf;font-size:13px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -82,6 +95,7 @@ try{players=JSON.parse(localStorage.getItem("pc-roster"))||initial}
 catch(e){players=initial}
 let tab="2027";
 let selectedPlayer=null;
+let editingIndex=0;
 const tabs=["2027","2028","2029","2030","Former Players","Coaches Contact","Edit Roster"];
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function safeURL(url){
@@ -101,6 +115,7 @@ if(selectedPlayer!==null && tab!=="Edit Roster"){renderProfile(el);return}
 if(tab==="Edit Roster"){
 el.innerHTML=`<div class="panel"><h2>Edit Player Roster</h2><p>Changes save in this browser only. Export your updates to publish them for everyone.</p><textarea id="editor"></textarea><p><button class="gold" onclick="saveRoster()">Save in Browser</button> <button onclick="exportRoster()">Export JSON</button> <button onclick="document.getElementById('importFile').click()">Import JSON</button></p><input id="importFile" type="file" accept=".json" onchange="importRoster(event)"></div>`;
 document.getElementById("editor").value=JSON.stringify(players,null,2);
+renderPhotoEditor(el);
 return
 }
 if(tab==="Coaches Contact"){
@@ -110,17 +125,67 @@ const q=document.getElementById("search").value.toLowerCase();
 let list=players.filter(p=>(tab==="Former Players"?p.year==="Former Players":p.year===tab)&&[p.name,p.position,p.number].join(" ").toLowerCase().includes(q));
 el.innerHTML=`<h2>${tab==="Former Players"?"Former Players":"Class of "+esc(tab)}</h2><div class="grid">`+
 (list.length?list.map(p=>`<article class="card" tabindex="0" role="button" data-profile="${esc(p.name)}" aria-label="View profile for ${esc(p.name)}">
-<div class="number">${esc(p.number?"#"+p.number:"")}</div>
+${photoMarkup(p)}<div class="number">${esc(p.number?"#"+p.number:"")}</div>
 <h2>${esc(p.name)}</h2>
 <p>${esc(p.position||"Position pending")}</p>
 <p class="small">${esc([p.height,p.weight?p.weight+" lbs":"",p.gpa?"GPA "+p.gpa:""].filter(Boolean).join(" | "))}</p>
 ${p.offers?`<p><strong>Reported offers:</strong> ${esc(p.offers)}</p>`:""}
+${offerLogoMarkup(p)}
 <div class="links">
 ${link(p.hudl,"Watch Hudl Film")}
 ${link(p.maxpreps,"MaxPreps")}
 ${p.x?link("https://x.com/"+encodeURIComponent(p.x.replace("@","")),"X Profile"):""}
 </div><div class="view">View full profile →</div></article>`).join(""):'<p>No players listed yet.</p>')+"</div>";
 el.querySelectorAll("[data-profile]").forEach(card=>{const open=()=>{selectedPlayer=players.find(p=>p.name===card.dataset.profile&&p.year===tab);render();window.scrollTo({top:0,behavior:"smooth"})};card.addEventListener("click",e=>{if(!e.target.closest("a"))open()});card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}})})
+}
+
+
+function imageURL(url){
+const u=String(url||"").trim();
+if(!u)return "";
+if(/^(?:images|assets)\\/[a-zA-Z0-9_./%+ -]+\\.(?:png|jpg|jpeg|webp|gif|svg)$/i.test(u)&&!u.includes(".."))return u.split("/").map(encodeURIComponent).join("/");
+return safeURL(u);
+}
+function photoMarkup(p){
+const src=imageURL(p.photo);
+return src?'<img class="player-photo" loading="lazy" src="'+esc(src)+'" alt="Photo of '+esc(p.name)+'" onerror="this.style.display=\'none\'">':'<div class="photo-missing">PLAYER PHOTO COMING SOON</div>';
+}
+function getOfferLogos(p){
+return Array.isArray(p.offerLogos)?p.offerLogos.filter(o=>o&&o.school&&imageURL(o.logo)):[];
+}
+function offerLogoMarkup(p){
+const logos=getOfferLogos(p);
+return logos.length?'<div class="offer-label">COLLEGE OFFERS</div><div class="offer-logos">'+logos.map(o=>'<img class="offer-logo" loading="lazy" title="'+esc(o.school)+'" alt="'+esc(o.school)+' logo" src="'+esc(imageURL(o.logo))+'">').join("")+'</div>':"";
+}
+function renderPhotoEditor(el){
+const panel=document.createElement("div");panel.className="panel";
+panel.innerHTML='<h2>Player Photos & College Logos</h2><p class="editor-help">Upload photo files to the GitHub repository’s <strong>images</strong> folder first, then enter their paths below (example: images/dj-verges.jpg). This editor previews changes in your browser; it does not publish them for everyone.</p>'+
+'<label for="photoPlayer">Choose player</label><select id="photoPlayer" style="width:100%;padding:12px;background:#222;color:white;border:1px solid #777;border-radius:7px"></select>'+
+'<div class="editor-row"><label>Player photo path or URL<input id="photoPath" placeholder="images/player-name.jpg"></label></div>'+
+'<h3>College Offer Logos</h3><div id="logoEditor"></div><button type="button" id="addOfferLogo">+ Add college logo</button>'+
+'<p><button class="gold" type="button" id="savePlayerImages">Save image fields in browser</button></p>'+
+'<p class="editor-help">For public updates, export your roster JSON and update the published website data. Do not treat browser-only changes as live.</p>';
+el.appendChild(panel);
+const select=panel.querySelector("#photoPlayer");
+players.forEach((p,i)=>{const o=document.createElement("option");o.value=i;o.textContent=p.name+" ("+p.year+")";select.appendChild(o)});
+editingIndex=Math.min(editingIndex,Math.max(0,players.length-1));select.value=editingIndex;
+const logoEditor=panel.querySelector("#logoEditor");
+function addLogoRow(school="",logo=""){
+const row=document.createElement("div");row.className="editor-row";
+row.innerHTML='<label>College name<input class="school" placeholder="College name"></label><label>Logo path or URL<input class="logo" placeholder="images/college-logo.png"></label><button type="button" class="remove-logo">Remove</button>';
+row.querySelector(".school").value=school;row.querySelector(".logo").value=logo;
+row.querySelector(".remove-logo").onclick=()=>row.remove();logoEditor.appendChild(row);
+}
+function load(){editingIndex=Number(select.value);const p=players[editingIndex];if(!p)return;panel.querySelector("#photoPath").value=p.photo||"";logoEditor.innerHTML="";(p.offerLogos||[]).forEach(o=>addLogoRow(o.school,o.logo))}
+select.onchange=load;panel.querySelector("#addOfferLogo").onclick=()=>addLogoRow();
+panel.querySelector("#savePlayerImages").onclick=()=>{
+const p=players[editingIndex];if(!p)return;
+p.photo=panel.querySelector("#photoPath").value.trim();
+p.offerLogos=[...logoEditor.children].map(row=>({school:row.querySelector(".school").value.trim(),logo:row.querySelector(".logo").value.trim()})).filter(o=>o.school&&o.logo);
+localStorage.setItem("pc-roster",JSON.stringify(players));
+document.getElementById("editor").value=JSON.stringify(players,null,2);
+alert("Saved in this browser only. Export your roster to prepare a public update.");
+};load();
 }
 
 function hudlEmbed(url){
@@ -139,10 +204,10 @@ if(!p){selectedPlayer=null;render();return}
 const details=[["POSITION",p.position],["HEIGHT",p.height],["WEIGHT",p.weight?p.weight+" lbs":""],["GPA",p.gpa],["CLASS",p.year]];
 const film=hudlEmbed(p.hudl);
 el.innerHTML='<button class="profile-back" id="backToRoster">← Back to Class of '+esc(p.year)+'</button>'+
-'<div class="profile"><section class="panel"><div class="jersey">'+esc(p.number?"#"+p.number:"")+'</div><h2>'+esc(p.name)+'</h2><p>Pell City High School · Alabama</p><div class="statgrid">'+
+'<div class="profile"><section class="panel">'+photoMarkup(p)+'<div class="jersey">'+esc(p.number?"#"+p.number:"")+'</div><h2>'+esc(p.name)+'</h2><p>Pell City High School · Alabama</p><div class="statgrid">'+
 details.map(([k,v])=>'<div class="stat"><span>'+k+'</span><strong>'+esc(v||"—")+'</strong></div>').join("")+
 '</div>'+(p.offers?'<h3>Reported College Offers</h3><p>'+esc(p.offers)+'</p><p class="hint">Offer information should be verified before sharing.</p>':'')+
-'<div class="links">'+link(p.hudl,"▶ Watch on Hudl")+link(p.maxpreps,"MaxPreps Stats")+(p.x?link("https://x.com/"+encodeURIComponent(p.x.replace("@","")),"X / Twitter"):"")+'</div></section>'+
+'+offerLogoMarkup(p)+'<div class="links">'+link(p.hudl,"▶ Watch on Hudl")+link(p.maxpreps,"MaxPreps Stats")+(p.x?link("https://x.com/"+encodeURIComponent(p.x.replace("@","")),"X / Twitter"):"")+'</div></section>'+
 '<section class="panel"><h2>Highlight Film</h2>'+
 (film?'<iframe class="film-frame" title="Hudl highlights for '+esc(p.name)+'" src="'+esc(film)+'" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>':
 '<div class="film-placeholder">'+(p.hudl?"Open the linked Hudl profile to view this player's highlights.":"Hudl film link has not been added yet.")+'</div>')+
