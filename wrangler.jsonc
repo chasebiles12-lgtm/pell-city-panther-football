@@ -1,0 +1,12 @@
+{
+  "name": "pell-city-panther-football",
+  "compatibility_date": "2026-11-13",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/api/*"
+    ]
+  },
+  "main": "cloudflare/worker.ts"
+}
