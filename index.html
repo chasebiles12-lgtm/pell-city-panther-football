@@ -27,6 +27,23 @@ input{background:#202024;border:1px solid #555;color:white;padding:12px;border-r
 .panel{background:#18181c;border:1px solid #544626;padding:20px;border-radius:12px;margin:20px 0}
 textarea{width:100%;min-height:280px;background:#111;color:#fff;border:1px solid #555;padding:12px}
 footer{text-align:center;padding:30px;color:#aaa;border-top:1px solid #333}
+
+.card{cursor:pointer;transition:transform .15s,border-color .15s}
+.card:hover,.card:focus-visible{transform:translateY(-3px);border-color:var(--gold);outline:none}
+.card .view{margin-top:14px;color:var(--gold);font-weight:700;font-size:14px}
+.profile-back{margin:4px 0 18px}
+.profile{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:20px}
+.profile h2{font-size:clamp(27px,4vw,42px);margin:0;color:var(--gold)}
+.profile .jersey{font-size:52px;font-weight:800;color:var(--gold)}
+.profile .statgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}
+.stat{background:#27272d;padding:13px;border-radius:9px}
+.stat span{display:block;color:#bdbdbd;font-size:12px;margin-bottom:5px}
+.stat strong{font-size:18px}
+.film-frame{width:100%;aspect-ratio:16/9;border:0;border-radius:8px;background:#070707}
+.film-placeholder{display:grid;place-items:center;aspect-ratio:16/9;background:#111;border:1px dashed #6b5a30;border-radius:8px;color:#bbb;text-align:center;padding:16px}
+.profile .links a{font-size:15px;padding:12px}
+.hint{font-size:13px;color:#bbb;line-height:1.5}
+@media(max-width:750px){.profile{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -64,6 +81,7 @@ let players;
 try{players=JSON.parse(localStorage.getItem("pc-roster"))||initial}
 catch(e){players=initial}
 let tab="2027";
+let selectedPlayer=null;
 const tabs=["2027","2028","2029","2030","Former Players","Coaches Contact","Edit Roster"];
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function safeURL(url){
@@ -74,11 +92,12 @@ function link(url,label){
 let u=safeURL(url);
 return u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${label}</a>`:""
 }
-function setTab(t){tab=t;render()}
+function setTab(t){tab=t;selectedPlayer=null;render()}
 function render(){
 document.getElementById("tabs").innerHTML=tabs.map(t=>`<button class="${tab===t?"active":""}" data-tab="${esc(t)}">${esc(t)}</button>`).join("");
 document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 const el=document.getElementById("content");
+if(selectedPlayer!==null && tab!=="Edit Roster"){renderProfile(el);return}
 if(tab==="Edit Roster"){
 el.innerHTML=`<div class="panel"><h2>Edit Player Roster</h2><p>Changes save in this browser only. Export your updates to publish them for everyone.</p><textarea id="editor"></textarea><p><button class="gold" onclick="saveRoster()">Save in Browser</button> <button onclick="exportRoster()">Export JSON</button> <button onclick="document.getElementById('importFile').click()">Import JSON</button></p><input id="importFile" type="file" accept=".json" onchange="importRoster(event)"></div>`;
 document.getElementById("editor").value=JSON.stringify(players,null,2);
@@ -90,7 +109,7 @@ el.innerHTML='<div class="panel"><h2>Coaches Contact</h2><p>Recruiting staff con
 const q=document.getElementById("search").value.toLowerCase();
 let list=players.filter(p=>(tab==="Former Players"?p.year==="Former Players":p.year===tab)&&[p.name,p.position,p.number].join(" ").toLowerCase().includes(q));
 el.innerHTML=`<h2>${tab==="Former Players"?"Former Players":"Class of "+esc(tab)}</h2><div class="grid">`+
-(list.length?list.map(p=>`<article class="card">
+(list.length?list.map(p=>`<article class="card" tabindex="0" role="button" data-profile="${esc(p.name)}" aria-label="View profile for ${esc(p.name)}">
 <div class="number">${esc(p.number?"#"+p.number:"")}</div>
 <h2>${esc(p.name)}</h2>
 <p>${esc(p.position||"Position pending")}</p>
@@ -100,8 +119,38 @@ ${p.offers?`<p><strong>Reported offers:</strong> ${esc(p.offers)}</p>`:""}
 ${link(p.hudl,"Watch Hudl Film")}
 ${link(p.maxpreps,"MaxPreps")}
 ${p.x?link("https://x.com/"+encodeURIComponent(p.x.replace("@","")),"X Profile"):""}
-</div></article>`).join(""):'<p>No players listed yet.</p>')+"</div>"
+</div><div class="view">View full profile →</div></article>`).join(""):'<p>No players listed yet.</p>')+"</div>";
+el.querySelectorAll("[data-profile]").forEach(card=>{const open=()=>{selectedPlayer=players.find(p=>p.name===card.dataset.profile&&p.year===tab);render();window.scrollTo({top:0,behavior:"smooth"})};card.addEventListener("click",e=>{if(!e.target.closest("a"))open()});card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}})})
 }
+
+function hudlEmbed(url){
+const u=safeURL(url);
+if(!u)return "";
+try{
+const p=new URL(u);
+if(!/(^|\\.)hudl\\.com$/.test(p.hostname))return "";
+const m=p.pathname.match(/^\\/video\\/(\\d+)\\/(\\d+)\\/([a-zA-Z0-9_-]+)\\/?$/);
+return m?"https://www.hudl.com/embed/video/"+m[1]+"/"+m[2]+"/"+m[3]:"";
+}catch(e){return ""}
+}
+function renderProfile(el){
+const p=selectedPlayer;
+if(!p){selectedPlayer=null;render();return}
+const details=[["POSITION",p.position],["HEIGHT",p.height],["WEIGHT",p.weight?p.weight+" lbs":""],["GPA",p.gpa],["CLASS",p.year]];
+const film=hudlEmbed(p.hudl);
+el.innerHTML='<button class="profile-back" id="backToRoster">← Back to Class of '+esc(p.year)+'</button>'+
+'<div class="profile"><section class="panel"><div class="jersey">'+esc(p.number?"#"+p.number:"")+'</div><h2>'+esc(p.name)+'</h2><p>Pell City High School · Alabama</p><div class="statgrid">'+
+details.map(([k,v])=>'<div class="stat"><span>'+k+'</span><strong>'+esc(v||"—")+'</strong></div>').join("")+
+'</div>'+(p.offers?'<h3>Reported College Offers</h3><p>'+esc(p.offers)+'</p><p class="hint">Offer information should be verified before sharing.</p>':'')+
+'<div class="links">'+link(p.hudl,"▶ Watch on Hudl")+link(p.maxpreps,"MaxPreps Stats")+(p.x?link("https://x.com/"+encodeURIComponent(p.x.replace("@","")),"X / Twitter"):"")+'</div></section>'+
+'<section class="panel"><h2>Highlight Film</h2>'+
+(film?'<iframe class="film-frame" title="Hudl highlights for '+esc(p.name)+'" src="'+esc(film)+'" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>':
+'<div class="film-placeholder">'+(p.hudl?"Open the linked Hudl profile to view this player's highlights.":"Hudl film link has not been added yet.")+'</div>')+
+'<p class="hint">If the embedded video is unavailable or blocked by Hudl, use the Watch on Hudl button to open the original video.</p>'+
+'<h3>Recruiting Links</h3><div class="links">'+link(p.hudl,"Hudl Highlights")+link(p.maxpreps,"MaxPreps Profile")+(p.x?link("https://x.com/"+encodeURIComponent(p.x.replace("@","")),"X Profile"):"")+'</div></section></div>';
+document.getElementById("backToRoster").onclick=()=>{selectedPlayer=null;render()};
+}
+
 function saveRoster(){
 try{
 let data=JSON.parse(document.getElementById("editor").value);
