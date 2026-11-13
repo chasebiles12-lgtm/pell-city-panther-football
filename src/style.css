@@ -1,0 +1,608 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;600;700;800&display=swap');
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #0b0b0c;
+  color: #f7f4ec;
+  font-family: Inter, Arial;
+}
+.app {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #292316, #101011 45%, #09090a);
+}
+header,
+main,
+.years {
+  max-width: 1400px;
+  margin: auto;
+  padding-left: 5vw;
+  padding-right: 5vw;
+}
+header {
+  padding-top: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #46391f;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.crest {
+  width: 58px;
+  height: 65px;
+  border: 2px solid #c9a75e;
+  display: grid;
+  place-items: center;
+  color: #d9b96d;
+  font: 900 26px 'Barlow Condensed';
+  background: #191713;
+}
+.crest img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.brand small,
+.brand label,
+.heading small,
+.hero small,
+.modal > small {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #d0b36e;
+  font-weight: 800;
+}
+.brand h1 {
+  font: 900 35px 'Barlow Condensed';
+  margin: 2px 0;
+}
+.brand i {
+  font-style: normal;
+  color: #d5b56c;
+}
+.outline {
+  background: none;
+  border: 1px solid #94773f;
+  color: #e3c77f;
+  padding: 11px 14px;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.upload {
+  font-size: 9px;
+  color: #dfc37c;
+  cursor: pointer;
+}
+.upload input {
+  display: none;
+}
+.years-shell {
+  max-width: 1400px;
+  margin: auto;
+  padding-left: 5vw;
+  padding-right: 5vw;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #292722;
+}
+.years {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+  align-items: center;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+.years::-webkit-scrollbar {
+  display: none;
+}
+.year-arrow {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #75603a;
+  background: #191918;
+  color: #e3c77f;
+  font-size: 23px;
+  line-height: 1;
+  cursor: pointer;
+}
+.year-arrow:hover {
+  background: #c9a75e;
+  color: #16130b;
+}
+.years span {
+  font-size: 10px;
+  color: #999;
+  margin-right: 10px;
+  white-space: nowrap;
+}
+.years button {
+  flex: 0 0 auto;
+  background: #191918;
+  border: 1px solid #39352c;
+  color: #aaa;
+  padding: 10px 17px;
+  font-weight: 800;
+}
+.years button.active {
+  background: #c9a75e;
+  color: #16130b;
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  margin-bottom: 20px;
+}
+.heading h2,
+.modal h2 {
+  font: 800 33px 'Barlow Condensed';
+  margin: 5px 0;
+}
+.gold {
+  background: linear-gradient(135deg, #e0c47d, #b28c43);
+  border: 0;
+  color: #17130a;
+  padding: 12px 16px;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.tabs {
+  display: flex;
+  gap: 5px;
+  border-bottom: 1px solid #3a352b;
+  margin-bottom: 22px;
+  overflow: auto;
+}
+.tabs button {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: #999;
+  padding: 13px 15px;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.tabs button.chosen {
+  color: #e4c77f;
+  border-color: #c9a65b;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+}
+aside,
+.panel {
+  background: #151514;
+  border: 1px solid #332f26;
+}
+aside h3 {
+  padding: 14px;
+  margin: 0;
+  border-bottom: 1px solid #383127;
+  color: #d8ba76;
+  font-size: 11px;
+}
+aside h3 small {
+  float: right;
+  color: #888;
+}
+.player {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid #292826;
+  color: #eee;
+  text-align: left;
+}
+.player.chosen {
+  background: #282317;
+  box-shadow: inset 3px 0 #d0ae63;
+}
+.initial {
+  width: 42px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #29251c;
+  border: 1px solid #75603a;
+  color: #e0c27a;
+  font: 700 18px 'Barlow Condensed';
+  flex: none;
+}
+.initial img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.player b {
+  font-size: 11px;
+}
+.player small,
+.dir small {
+  display: block;
+  color: #999;
+  font-size: 9px;
+  margin-top: 5px;
+}
+.player > span {
+  margin-left: auto;
+}
+.hero {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(110deg, #211e16, #131313);
+  border: 1px solid #514126;
+  position: relative;
+}
+.photo {
+  width: 130px;
+  height: 145px;
+  flex: none;
+  background: #28241c;
+  border: 1px solid #8c7140;
+  position: relative;
+  display: grid;
+  place-items: center;
+  color: #927b4d;
+  font: 800 17px 'Barlow Condensed';
+  text-align: center;
+}
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  background: #000c;
+  padding: 8px;
+}
+.bio h2 {
+  font: 900 40px 'Barlow Condensed';
+  margin: 4px 0;
+}
+.bio p {
+  font-size: 11px;
+  color: #d7bd84;
+}
+.metrics {
+  display: flex;
+  gap: 24px;
+  margin: 14px 0;
+}
+.metrics div {
+  display: grid;
+}
+.metrics b {
+  font: 700 22px 'Barlow Condensed';
+  color: #e3c47b;
+}
+.metrics small {
+  font-size: 8px;
+  color: #999;
+}
+.edit {
+  margin-left: auto;
+  align-self: flex-start;
+}
+.two {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+.panel {
+  padding: 16px;
+  margin-top: 14px;
+}
+.two .panel {
+  margin: 0;
+}
+.panel h3 {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #e1c47f;
+  border-bottom: 1px solid #373127;
+  padding-bottom: 13px;
+  margin: 0 0 14px;
+}
+.panel h3 a {
+  float: right;
+  color: #aaa;
+}
+.panel h3 span {
+  float: right;
+  color: #999;
+  font-size: 8px;
+}
+.panel iframe {
+  width: 100%;
+  height: 220px;
+  border: 0;
+}
+.panel p,
+.panel small {
+  font-size: 10px;
+  color: #888;
+}
+.stats {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.stats div {
+  padding: 12px;
+  background: #211f1a;
+  border: 1px solid #393126;
+}
+.stats b {
+  display: block;
+  font: 700 22px 'Barlow Condensed';
+  color: #e3c47c;
+}
+.stats small {
+  font-size: 9px;
+}
+.schools {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 9px;
+}
+.schoolcard {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px;
+  background: #211f1b;
+  border: 1px solid #3a3326;
+  min-width: 0;
+}
+.schoollogo {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  background: #f3f0e9;
+  color: #29251c;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font: 800 12px 'Barlow Condensed';
+}
+.schoollogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.schoolcard b {
+  font-size: 10px;
+}
+.schoolcard small {
+  display: block;
+  color: #c9aa68;
+  font-size: 8px;
+  margin-top: 4px;
+}
+.schoolcard .upload {
+  margin-left: auto;
+  white-space: nowrap;
+}
+.addschool {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+}
+.addschool input {
+  flex: 1;
+  min-width: 0;
+}
+.addschool input,
+.addschool select,
+input,
+select,
+textarea {
+  background: #0d0d0d;
+  color: #eee;
+  border: 1px solid #494236;
+  padding: 10px;
+  font: inherit;
+  font-size: 11px;
+}
+.directory {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+.dir {
+  display: flex;
+  gap: 13px;
+  padding: 15px;
+  background: #151514;
+  border: 1px solid #373126;
+}
+.dir > div:last-child {
+  flex: 1;
+}
+.dir b {
+  font-size: 12px;
+}
+.contact {
+  max-width: 600px;
+}
+.contact label,
+.modal label {
+  display: block;
+  color: #bda979;
+  font-size: 10px;
+  margin: 12px 0;
+}
+.contact input,
+.modal input,
+.modal select,
+.modal textarea {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+}
+footer {
+  border-top: 1px solid #403522;
+  padding: 24px 5vw;
+  display: flex;
+  justify-content: space-between;
+  color: #d5b66f;
+}
+footer b {
+  font: 800 20px 'Barlow Condensed';
+}
+footer button {
+  background: none;
+  border: 0;
+  color: #d5b66f;
+}
+.shade {
+  position: fixed;
+  inset: 0;
+  background: #000c;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  z-index: 10;
+}
+.modal {
+  background: #181816;
+  border: 1px solid #8b7040;
+  padding: 25px;
+  width: min(440px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  position: relative;
+}
+.modal.wide {
+  width: min(740px, 100%);
+}
+.close {
+  position: absolute;
+  right: 12px;
+  top: 7px;
+  background: none;
+  border: 0;
+  color: #aaa;
+  font-size: 25px;
+}
+.form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+}
+.modal textarea {
+  min-height: 90px;
+}
+.delete {
+  background: #682f29;
+  color: white;
+  border: 0;
+  padding: 12px;
+  margin-left: 8px;
+}
+.toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  background: #d6b66d;
+  padding: 13px;
+  border: 0;
+  z-index: 30;
+}
+@media (max-width: 850px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .two {
+    grid-template-columns: 1fr;
+  }
+  .edit {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+  }
+  .hero {
+    padding-top: 42px;
+  }
+}
+@media (max-width: 560px) {
+  header {
+    padding: 15px;
+    align-items: flex-start;
+  }
+  .brand h1 {
+    font-size: 27px;
+  }
+  .crest {
+    width: 46px;
+    height: 54px;
+  }
+  .years {
+    padding: 12px;
+  }
+  .years button {
+    padding: 9px 12px;
+  }
+  main {
+    padding: 22px 13px 45px;
+  }
+  .player {
+    width: 100%;
+  }
+  .hero {
+    gap: 11px;
+    padding: 42px 11px 13px;
+  }
+  .photo {
+    width: 92px;
+    height: 115px;
+  }
+  .bio h2 {
+    font-size: 29px;
+  }
+  .metrics {
+    gap: 13px;
+  }
+  .addschool {
+    flex-wrap: wrap;
+  }
+  .addschool input {
+    flex-basis: 100%;
+  }
+  .form {
+    grid-template-columns: 1fr;
+  }
+}
