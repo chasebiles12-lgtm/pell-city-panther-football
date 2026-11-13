@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PELL CITY PANTHER FOOTBALL</title>
+<style>
+:root{--gold:#d4af37;--black:#0b0b0d;--card:#1b1b20}
+*{box-sizing:border-box}
+body{margin:0;background:var(--black);color:white;font-family:Arial,sans-serif}
+header{background:linear-gradient(125deg,#101010,#382c10);padding:55px 20px;text-align:center;border-bottom:3px solid var(--gold)}
+h1{font-size:clamp(32px,6vw,64px);color:var(--gold);margin:0;letter-spacing:2px}
+header p{color:#ddd}
+main{max-width:1150px;margin:auto;padding:24px 16px}
+nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:18px}
+button{background:#262626;border:1px solid #77652b;color:white;padding:11px 15px;border-radius:7px;cursor:pointer}
+button.active,.gold{background:var(--gold);color:#111;font-weight:bold}
+input{background:#202024;border:1px solid #555;color:white;padding:12px;border-radius:7px;width:100%;margin:10px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:17px}
+.card{background:var(--card);border:1px solid #48402b;border-radius:12px;padding:20px}
+.card h2{color:var(--gold);margin:0 0 8px}
+.number{color:var(--gold);font-weight:bold;font-size:30px}
+.small{color:#aaa;font-size:13px}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
+.links a{background:#35312a;color:#f5d47a;text-decoration:none;padding:8px 11px;border-radius:6px;font-size:13px}
+.panel{background:#18181c;border:1px solid #544626;padding:20px;border-radius:12px;margin:20px 0}
+textarea{width:100%;min-height:280px;background:#111;color:#fff;border:1px solid #555;padding:12px}
+footer{text-align:center;padding:30px;color:#aaa;border-top:1px solid #333}
+</style>
+</head>
+<body>
+<header>
+<h1>PELL CITY PANTHER FOOTBALL</h1>
+<p>Pell City High School | Alabama</p>
+</header>
+<nav id="tabs"></nav>
+<main>
+<input id="search" placeholder="Search players, positions, or jersey numbers..." oninput="render()">
+<div id="content"></div>
+</main>
+<footer>PELL CITY PANTHERS | FOOTBALL RECRUITING</footer>
+<script>
+const initial=[
+{name:"DJ Verges",number:"22",position:"LB",year:"2027",height:"6'2",weight:"230",gpa:"3.8",offers:"Troy, Arkansas State, FIU, UT Martin, Samford, ETSU",x:"VERGESDJ27"},
+{name:"Hudson Bell",number:"71",position:"OL",year:"2027",height:"6'4",weight:"270",gpa:"4.4",offers:"Samford, North Alabama, Austin Peay",x:"HUDSONBELL09"},
+{name:"Theon Williams",position:"DB/LB",year:"2027"},
+{name:"JJ Hamby",position:"TE/WR",year:"2027"},
+{name:"Parker Davis",position:"DL",year:"2027"},
+{name:"Brody Gossett",position:"ATH",year:"2027"},
+{name:"Devin Lovell",position:"OL",year:"2027"},
+{name:"Juju Holland",position:"DB/LB",year:"2027"},
+{name:"Aniff McFarlane",position:"DL",year:"2027"},
+{name:"TJ Sanders",number:"2",position:"DB",year:"2028",height:"6'0",weight:"160",gpa:"2.9",offers:"Georgia State, ULM, Jacksonville State",x:"SANDERS_TJ7"},
+{name:"Jamari Robinson",number:"70",position:"OL",year:"2028",height:"6'3",weight:"310",x:"JAMARIROB70"},
+{name:"Brenon Saulter",number:"11",position:"WR",year:"2028",height:"6'2",weight:"195"},
+{name:"Carter Hughes",number:"55",position:"OL",year:"2028",height:"6'4",weight:"280"},
+{name:"Jaylen Bedford",number:"14",position:"DB/LB",year:"2028",height:"6'1",weight:"185"},
+{name:"JT Turner",number:"7",position:"DB",year:"2028",height:"5'11",weight:"170"},
+{name:"Gage Henley",number:"4",position:"DB",year:"2029",height:"6'4",weight:"185",hudl:"https://www.hudl.com/profile/18324750/Gage-Henley/highlights",maxpreps:"https://www.maxpreps.com/al/pell-city/pell-city-panthers/athletes/gage-henley/?careerid=4g8pkf5sa7il5"},
+{name:"DJ Wade",number:"10",position:"ATH",year:"2029",height:"5'8",weight:"180"}
+];
+let players;
+try{players=JSON.parse(localStorage.getItem("pc-roster"))||initial}
+catch(e){players=initial}
+let tab="2027";
+const tabs=["2027","2028","2029","2030","Former Players","Coaches Contact","Edit Roster"];
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function safeURL(url){
+try{let u=new URL(url);return ["https:","http:"].includes(u.protocol)?u.href:""}
+catch(e){return ""}
+}
+function link(url,label){
+let u=safeURL(url);
+return u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${label}</a>`:""
+}
+function setTab(t){tab=t;render()}
+function render(){
+document.getElementById("tabs").innerHTML=tabs.map(t=>`<button class="${tab===t?"active":""}" data-tab="${esc(t)}">${esc(t)}</button>`).join("");
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+const el=document.getElementById("content");
+if(tab==="Edit Roster"){
+el.innerHTML=`<div class="panel"><h2>Edit Player Roster</h2><p>Changes save in this browser only. Export your updates to publish them for everyone.</p><textarea id="editor"></textarea><p><button class="gold" onclick="saveRoster()">Save in Browser</button> <button onclick="exportRoster()">Export JSON</button> <button onclick="document.getElementById('importFile').click()">Import JSON</button></p><input id="importFile" type="file" accept=".json" onchange="importRoster(event)"></div>`;
+document.getElementById("editor").value=JSON.stringify(players,null,2);
+return
+}
+if(tab==="Coaches Contact"){
+el.innerHTML='<div class="panel"><h2>Coaches Contact</h2><p>Recruiting staff contact information will be added here.</p></div>';return
+}
+const q=document.getElementById("search").value.toLowerCase();
+let list=players.filter(p=>(tab==="Former Players"?p.year==="Former Players":p.year===tab)&&[p.name,p.position,p.number].join(" ").toLowerCase().includes(q));
+el.innerHTML=`<h2>${tab==="Former Players"?"Former Players":"Class of "+esc(tab)}</h2><div class="grid">`+
+(list.length?list.map(p=>`<article class="card">
+<div class="number">${esc(p.number?"#"+p.number:"")}</div>
+<h2>${esc(p.name)}</h2>
+<p>${esc(p.position||"Position pending")}</p>
+<p class="small">${esc([p.height,p.weight?p.weight+" lbs":"",p.gpa?"GPA "+p.gpa:""].filter(Boolean).join(" | "))}</p>
+${p.offers?`<p><strong>Reported offers:</strong> ${esc(p.offers)}</p>`:""}
+<div class="links">
+${link(p.hudl,"Watch Hudl Film")}
+${link(p.maxpreps,"MaxPreps")}
+${p.x?link("https://x.com/"+encodeURIComponent(p.x.replace("@","")),"X Profile"):""}
+</div></article>`).join(""):'<p>No players listed yet.</p>')+"</div>"
+}
+function saveRoster(){
+try{
+let data=JSON.parse(document.getElementById("editor").value);
+if(!Array.isArray(data))throw Error("Roster must be an array");
+players=data;localStorage.setItem("pc-roster",JSON.stringify(players));
+alert("Saved in this browser. Export and publish the changes for visitors.");
+render()
+}catch(e){alert("Invalid roster JSON: "+e.message)}
+}
+function exportRoster(){
+const blob=new Blob([JSON.stringify(players,null,2)],{type:"application/json"});
+const a=document.createElement("a");
+a.href=URL.createObjectURL(blob);a.download="pell-city-roster.json";a.click();
+setTimeout(()=>URL.revokeObjectURL(a.href),1000)
+}
+function importRoster(e){
+const file=e.target.files[0];if(!file)return;
+const reader=new FileReader();
+reader.onload=()=>{
+try{
+const data=JSON.parse(reader.result);
+if(!Array.isArray(data))throw Error("Invalid roster");
+players=data;localStorage.setItem("pc-roster",JSON.stringify(players));render()
+}catch(err){alert(err.message)}
+};
+reader.readAsText(file)
+}
+render();
+</script>
+</body>
+</html>
