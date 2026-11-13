@@ -207,7 +207,7 @@ el.innerHTML='<button class="profile-back" id="backToRoster">← Back to Class o
 '<div class="profile"><section class="panel">'+photoMarkup(p)+'<div class="jersey">'+esc(p.number?"#"+p.number:"")+'</div><h2>'+esc(p.name)+'</h2><p>Pell City High School · Alabama</p><div class="statgrid">'+
 details.map(([k,v])=>'<div class="stat"><span>'+k+'</span><strong>'+esc(v||"—")+'</strong></div>').join("")+
 '</div>'+(p.offers?'<h3>Reported College Offers</h3><p>'+esc(p.offers)+'</p><p class="hint">Offer information should be verified before sharing.</p>':'')+
-'+offerLogoMarkup(p)+'<div class="links">'+link(p.hudl,"▶ Watch on Hudl")+link(p.maxpreps,"MaxPreps Stats")+(p.x?link("https://x.com/"+encodeURIComponent(p.x.replace("@","")),"X / Twitter"):"")+'</div></section>'+
++offerLogoMarkup(p)+'<div class="links">'+link(p.hudl,"▶ Watch on Hudl")+link(p.maxpreps,"MaxPreps Stats")+(p.x?link("https://x.com/"+encodeURIComponent(p.x.replace("@","")),"X / Twitter"):"")+'</div></section>'+
 '<section class="panel"><h2>Highlight Film</h2>'+
 (film?'<iframe class="film-frame" title="Hudl highlights for '+esc(p.name)+'" src="'+esc(film)+'" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>':
 '<div class="film-placeholder">'+(p.hudl?"Open the linked Hudl profile to view this player's highlights.":"Hudl film link has not been added yet.")+'</div>')+
